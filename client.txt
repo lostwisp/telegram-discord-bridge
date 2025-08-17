@@ -1,0 +1,95 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"net"
+	"os"
+	"time"
+)
+
+func main() {
+	go listening()
+	time.Sleep(time.Second * 5)
+	go func() {
+
+		fmt.Println("client 1 start")
+		file, err := os.Create("client.txt")
+		if err != nil {
+			print("Client 1: Error creating file")
+		}
+		defer file.Close()
+		conn, err := net.Dial("tcp", "127.0.0.1:4545")
+		if err != nil {
+			print("Client 1: Not connecting")
+			return
+		}
+		defer conn.Close()
+		file.WriteString("Client 1 working...\n")
+		io.Copy(file, conn)
+		file.WriteString("\nClient 1 complite...")
+		file.Close()
+		file, err = os.Open("client.txt")
+		b := make([]byte, 1024)
+		for {
+			n, err := file.Read(b)
+			if err == io.EOF {
+				break
+			}
+			fmt.Print(string(b[:n]))
+		}
+	}()
+	go func() {
+		fmt.Println("client 2 start")
+		file, err := os.Create("client.txt")
+		if err != nil {
+			print("Client 2: Error creating file")
+		}
+		defer file.Close()
+		conn, err := net.Dial("tcp", "127.0.0.1:4545")
+		if err != nil {
+			print("Client 2: Not connecting")
+			return
+		}
+		defer conn.Close()
+		file.WriteString("Client 2 working...\n")
+		io.Copy(file, conn)
+		file.WriteString("\nClient 2 complite...")
+		file.Close()
+		file, err = os.Open("client.txt")
+		b := make([]byte, 1024)
+		for {
+			n, err := file.Read(b)
+			if err == io.EOF {
+				break
+			}
+			fmt.Print(string(b[:n]))
+		}
+	}()
+
+	fmt.Println("sleap")
+	time.Sleep(30 * time.Second)
+}
+
+func listening() {
+	conn, err := net.Listen("tcp", ":4545")
+	if err != nil {
+		print("Server: Error in listening port 4545")
+		return
+	}
+	defer conn.Close()
+	fmt.Println("Server: Server is listening on :4545")
+	for {
+		a, err := conn.Accept()
+		if err != nil {
+			println("Server: Error in Accept")
+			continue
+		}
+		_, err = a.Write([]byte("Hello, I'm server"))
+		fmt.Println(a.LocalAddr(), "Client connected")
+		if err != nil {
+			fmt.Println("Server: Error writing:", err)
+		}
+		a.Close()
+	}
+}

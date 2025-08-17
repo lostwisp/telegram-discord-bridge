@@ -12,8 +12,9 @@ import (
 var TOKEN string
 
 func SendMessenge(idchat int, messege string) error {
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", TOKEN, idchat, url.QueryEscape(messege))
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", TOKEN, idchat, url.QueryEscape("Сообщение принято"))
 	_, err := http.Get(url)
+	SendMessengeToDiscord(messege)
 	if err != nil {
 		println(err)
 	}
@@ -26,6 +27,13 @@ func main() {
 	if err != nil {
 		println(err)
 	}
+
+	err = InstalDiscordBot()
+	if err != nil {
+		println(err)
+	}
+	defer discord.Close()
+
 	for {
 		URL := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?offset=%d", TOKEN, offset)
 		resp, err := http.Get(URL)
@@ -37,7 +45,6 @@ func main() {
 			println(err)
 		}
 		resp.Body.Close()
-
 		var result struct {
 			Ok     bool `json:"ok"`
 			Result []struct {
@@ -58,7 +65,7 @@ func main() {
 		if result.Ok && (len(result.Result) > 0) {
 			for _, update := range result.Result {
 				println(update.UpdateID, " ", update.Message.Text)
-				SendMessenge(update.Message.Chat.Id, "Сообщение принято")
+				SendMessenge(update.Message.Chat.Id, update.Message.Text)
 				if err != nil {
 					println("Сообщение не отправленно")
 				}
