@@ -1,4 +1,4 @@
-package main
+package MyDiscord
 
 import "github.com/bwmarrin/discordgo"
 
