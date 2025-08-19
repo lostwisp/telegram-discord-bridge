@@ -1,4 +1,4 @@
-package main
+package config
 
 var (
 	telegramToken string

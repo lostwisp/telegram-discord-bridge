@@ -1,6 +1,9 @@
-package MyDiscord
+package discord
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"github.com/HamsterNiki/TelegramDiscordBridge/MyDiscordPackege/config"
+	"github.com/bwmarrin/discordgo"
+)
 
 var discord *discordgo.Session
 var channelID string

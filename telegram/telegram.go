@@ -1,10 +1,9 @@
-package MyTelegram
+package telegram
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/HamsterNiki/TelegramDiscordBridge/MyDiscord"
-	"github.com/HamsterNiki/TelegramDiscordBridge/main"
+	"github.com/HamsterNiki/TelegramDiscordBridge/MyDiscordPackege/mydiscord"
 	"io"
 	"net/http"
 	"net/url"
