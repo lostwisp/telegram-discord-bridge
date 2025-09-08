@@ -1,21 +1,20 @@
 package discord
 
 import (
-	"github.com/HamsterNiki/TelegramDiscordBridge/MyDiscordPackege/config"
 	"github.com/bwmarrin/discordgo"
 )
 
-var discord *discordgo.Session
+var Session *discordgo.Session
 var channelID string
 
 func InstalDiscordBot() error {
 	channelID = ""
 	var err error
-	discord, err = discordgo.New("Bot " + "")
+	Session, err = discordgo.New("Bot " + "")
 	if err != nil {
 		return err
 	}
-	err = discord.Open()
+	err = Session.Open()
 	if err != nil {
 		print(err)
 	}
@@ -27,7 +26,7 @@ func InstalDiscordBot() error {
 //}
 
 func SendMessengeToDiscord(massageTG string) {
-	_, err := discord.ChannelMessageSend(channelID, massageTG)
+	_, err := Session.ChannelMessageSend(channelID, massageTG)
 	if err != nil {
 		print(err)
 	}

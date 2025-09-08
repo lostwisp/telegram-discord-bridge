@@ -3,35 +3,33 @@ package telegram
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/HamsterNiki/TelegramDiscordBridge/MyDiscordPackege/mydiscord"
+
+	//"github.com/HamsterNiki/TelegramDiscordBridge/discord"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
+
+	config "github.com/HamsterNiki/TelegramDiscordBridge/pwd"
 )
 
 func SendMessenge(idchat int, messege string) error {
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", telegramToken, idchat, url.QueryEscape("Сообщение принято"))
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", config.TelegramToken, idchat, url.QueryEscape("Сообщение принято"))
 	_, err := http.Get(url)
-	MyDiscord.SendMessengeToDiscord(messege)
+	//discord.SendMessengeToDiscord(messege)
 	if err != nil {
 		println(err)
 	}
 	return nil
 }
 
-func Start(TOCEN string) error {
+func Start(TOKEN string) error {
 	offset := 791038172
-	_, err := fmt.Scanln(&TOKEN)
-	if err != nil {
-		println(err)
-	}
-
-	err = InstalDiscordBot()
-	if err != nil {
-		println(err)
-	}
-	defer discord.Close()
+	//err := discord.InstalDiscordBot()
+	//if err != nil {
+	//	println(err)
+	//}
+	//defer discord.Session.Close()
 
 	for {
 		URL := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?offset=%d", TOKEN, offset)
@@ -48,12 +46,25 @@ func Start(TOCEN string) error {
 			Ok     bool `json:"ok"`
 			Result []struct {
 				UpdateID int `json:"update_id"`
-				Message  struct {
+				Message  *struct {
 					Text string `json:"text"`
 					Chat struct {
 						Id int `json:"id"`
 					} `json:"chat"`
+					From struct {
+						ID int64 `json:"id"`
+					} `json:"from"`
 				} `json:"message"`
+				CallbackQuery struct {
+					ID   string `json:"id"`
+					From struct {
+						Id        int64  `json:"id"`
+						IsBot     bool   `json:"is_bot"`
+						FirstName string `json:"first_name"`
+						Username  string `json:"username"`
+					} `json:"from"`
+					Data string `json:"data"`
+				} `json:"callback_query"`
 			} `json:"result"`
 		}
 		err = json.Unmarshal(dat, &result)
@@ -63,10 +74,15 @@ func Start(TOCEN string) error {
 
 		if result.Ok && (len(result.Result) > 0) {
 			for _, update := range result.Result {
-				println(update.UpdateID, " ", update.Message.Text)
-				SendMessenge(update.Message.Chat.Id, update.Message.Text)
-				if err != nil {
-					println("Сообщение не отправленно")
+
+				println("UpdateID:", update.UpdateID, " UsersId:", update.Message.From.ID, " Message: ", update.Message.Text)
+				if config.TelegramIdAdmin[update.Message.From.ID] {
+					SendMessenge(update.Message.Chat.Id, update.Message.Text)
+					if err != nil {
+						println("Сообщение не отправленно")
+					}
+				} else {
+					print("Доступ запрещён")
 				}
 				offset = update.UpdateID + 1
 			}

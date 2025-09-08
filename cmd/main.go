@@ -2,22 +2,21 @@ package main
 
 import (
 	"fmt"
-	"github.com/HamsterWiki/TelegramDiscordBridge/discord"
-	"github.com/HamsterWiki/TelegramDiscordBridge/telegram"
+	"github.com/HamsterNiki/TelegramDiscordBridge/pwd"
+	"github.com/HamsterNiki/TelegramDiscordBridge/telegram"
 )
 
 func main() {
 	var err error
 	fmt.Print("Telegram token: ")
-	_, err = fmt.Scanln(&telegramToken)
+	_, err = fmt.Scanln(&config.TelegramToken)
 	if err != nil {
 		println(err)
 	}
-
 	fmt.Print("Discord token: ")
-	_, err = fmt.Scanln(&discordToken)
+	_, err = fmt.Scanln(&config.DiscordToken)
 	if err != nil {
 		println(err)
 	}
-
+	telegram.Start(config.TelegramToken)
 }
