@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	//"github.com/HamsterNiki/TelegramDiscordBridge/discord"
+	"github.com/HamsterNiki/TelegramDiscordBridge/discord"
 	"io"
 	"net/http"
 	"net/url"
@@ -16,7 +16,7 @@ import (
 func SendMessenge(idchat int, messege string) error {
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", config.TelegramToken, idchat, url.QueryEscape("Сообщение принято"))
 	_, err := http.Get(url)
-	//discord.SendMessengeToDiscord(messege)
+	discord.SendMessengeToDiscord(messege)
 	if err != nil {
 		println(err)
 	}
@@ -25,11 +25,11 @@ func SendMessenge(idchat int, messege string) error {
 
 func Start(TOKEN string) error {
 	offset := 791038172
-	//err := discord.InstalDiscordBot()
-	//if err != nil {
-	//	println(err)
-	//}
-	//defer discord.Session.Close()
+	err := discord.InstalDiscordBot()
+	if err != nil {
+		println(err)
+	}
+	defer discord.Session.Close()
 
 	for {
 		URL := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?offset=%d", TOKEN, offset)

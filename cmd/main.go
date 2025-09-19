@@ -18,5 +18,10 @@ func main() {
 	if err != nil {
 		println(err)
 	}
+	fmt.Println("DiscordchannelID: ")
+	_, err = fmt.Scanln(&config.DiscordchannelID)
+	if err != nil {
+		println(err)
+	}
 	telegram.Start(config.TelegramToken)
 }
