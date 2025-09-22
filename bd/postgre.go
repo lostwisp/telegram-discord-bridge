@@ -1,6 +1,10 @@
 package bd
 
-import "github.com/jackc/pgx/v5"
+import (
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
-type Client interface {
+type Storage struct {
+	db *pgxpool.Pool
 }
