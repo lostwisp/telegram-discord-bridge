@@ -1,5 +1,16 @@
+version: "1.0"
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
   db:
-    build: /bd
+    image: postgres
+    environment:
+      POSTGRES_DB: habrdb
+      POSTGRES_USER: habrpguser
+      POSTGRES_PASSWORD: pgpwd4habr
+  bdConn:
+    build:
+      context: ./dbConn
+      dockerfile: Dockerfile

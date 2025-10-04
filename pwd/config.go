@@ -1,5 +1,13 @@
 package config
 
+type ConfigDB struct {
+	db_host    string
+	db_port    string
+	db_user    string
+	db_pasword string
+	db_name    string
+}
+
 var (
 	TelegramToken string
 )

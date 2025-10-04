@@ -13,6 +13,10 @@ import (
 	config "github.com/HamsterNiki/TelegramDiscordBridge/pwd"
 )
 
+func main() {
+
+}
+
 func SendMessenge(idchat int, messege string) error {
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", config.TelegramToken, idchat, url.QueryEscape("Сообщение принято"))
 	_, err := http.Get(url)

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/HamsterNiki/TelegramDiscordBridge/pwd"
-	"github.com/HamsterNiki/TelegramDiscordBridge/telegram"
+	"github.com/HamsterNiki/TelegramDiscordBridge/telegram-bot"
 )
 
 func main() {
