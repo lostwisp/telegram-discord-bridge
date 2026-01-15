@@ -3,15 +3,21 @@ package telegram
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/HamsterNiki/TelegramDiscordBridge/discord"
 	"io"
 	"net/http"
 	"net/url"
 	"time"
-
-	config "github.com/HamsterNiki/TelegramDiscordBridge/pwd"
 )
+
+var (
+	TelegramToken string
+)
+
+var TelegramIdAdmin = map[int64]bool{
+	1996660543: true,
+	5526345699: true,
+	5497536893: true,
+}
 
 func main() {
 

@@ -1,8 +1,15 @@
 package discord
 
 import (
-	config "github.com/HamsterNiki/TelegramDiscordBridge/pwd"
 	"github.com/bwmarrin/discordgo"
+	tgdis "github.com/lostwisp/telegram-discord-bridge/gRPC/tg-dis"
+	"log"
+	"net"
+)
+
+var (
+	DiscordToken     string
+	DiscordchannelID string
 )
 
 var Session *discordgo.Session
@@ -18,6 +25,7 @@ func InstalDiscordBot() error {
 		print(err)
 	}
 	return nil
+
 }
 
 func SendMessengeToDiscord(massageTG string) {
@@ -25,4 +33,12 @@ func SendMessengeToDiscord(massageTG string) {
 	if err != nil {
 		print(err)
 	}
+}
+
+func main() {
+	conn, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Println(err)
+	}
+
 }
