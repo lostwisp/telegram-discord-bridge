@@ -1,1 +1,1 @@
-# TelegramDiscordBridge
+# telegram-discord-bridge
