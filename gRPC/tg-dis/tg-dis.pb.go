@@ -117,8 +117,8 @@ const file_tg_dis_proto_rawDesc = "" +
 	"\x0eMessageRequest\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"'\n" +
 	"\x0fMessageResponse\x12\x14\n" +
-	"\x05score\x18\x01 \x01(\x03R\x05score2R\n" +
-	"\x13TgdisMessageService\x12;\n" +
+	"\x05score\x18\x01 \x01(\x03R\x05score2K\n" +
+	"\fTgdisMessage\x12;\n" +
 	"\n" +
 	"NewMessage\x12\x15.tgdis.MessageRequest\x1a\x16.tgdis.MessageResponseB-Z+github.com/lostwisp/telegram-discord-bridgeb\x06proto3"
 
@@ -140,8 +140,8 @@ var file_tg_dis_proto_goTypes = []any{
 	(*MessageResponse)(nil), // 1: tgdis.MessageResponse
 }
 var file_tg_dis_proto_depIdxs = []int32{
-	0, // 0: tgdis.TgdisMessageService.NewMessage:input_type -> tgdis.MessageRequest
-	1, // 1: tgdis.TgdisMessageService.NewMessage:output_type -> tgdis.MessageResponse
+	0, // 0: tgdis.TgdisMessage.NewMessage:input_type -> tgdis.MessageRequest
+	1, // 1: tgdis.TgdisMessage.NewMessage:output_type -> tgdis.MessageResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

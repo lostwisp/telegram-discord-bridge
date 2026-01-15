@@ -4,7 +4,7 @@ package tgdis;
 
 option go_package = "github.com/lostwisp/telegram-discord-bridge";
 
-service TgdisMessageService{
+service TgdisMessage{
     rpc NewMessage (MessageRequest) returns (MessageResponse);
 }
 
