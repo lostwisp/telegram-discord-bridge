@@ -19,101 +19,101 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TgdisMessageService_NewMessage_FullMethodName = "/tgdis.TgdisMessageService/NewMessage"
+	TgdisMessage_NewMessage_FullMethodName = "/tgdis.TgdisMessage/NewMessage"
 )
 
-// TgdisMessageServiceClient is the client API for TgdisMessageService service.
+// TgdisMessageClient is the client API for TgdisMessage service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type TgdisMessageServiceClient interface {
+type TgdisMessageClient interface {
 	NewMessage(ctx context.Context, in *MessageRequest, opts ...grpc.CallOption) (*MessageResponse, error)
 }
 
-type tgdisMessageServiceClient struct {
+type tgdisMessageClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewTgdisMessageServiceClient(cc grpc.ClientConnInterface) TgdisMessageServiceClient {
-	return &tgdisMessageServiceClient{cc}
+func NewTgdisMessageClient(cc grpc.ClientConnInterface) TgdisMessageClient {
+	return &tgdisMessageClient{cc}
 }
 
-func (c *tgdisMessageServiceClient) NewMessage(ctx context.Context, in *MessageRequest, opts ...grpc.CallOption) (*MessageResponse, error) {
+func (c *tgdisMessageClient) NewMessage(ctx context.Context, in *MessageRequest, opts ...grpc.CallOption) (*MessageResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(MessageResponse)
-	err := c.cc.Invoke(ctx, TgdisMessageService_NewMessage_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, TgdisMessage_NewMessage_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// TgdisMessageServiceServer is the server API for TgdisMessageService service.
-// All implementations must embed UnimplementedTgdisMessageServiceServer
+// TgdisMessageServer is the server API for TgdisMessage service.
+// All implementations must embed UnimplementedTgdisMessageServer
 // for forward compatibility.
-type TgdisMessageServiceServer interface {
+type TgdisMessageServer interface {
 	NewMessage(context.Context, *MessageRequest) (*MessageResponse, error)
-	mustEmbedUnimplementedTgdisMessageServiceServer()
+	mustEmbedUnimplementedTgdisMessageServer()
 }
 
-// UnimplementedTgdisMessageServiceServer must be embedded to have
+// UnimplementedTgdisMessageServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedTgdisMessageServiceServer struct{}
+type UnimplementedTgdisMessageServer struct{}
 
-func (UnimplementedTgdisMessageServiceServer) NewMessage(context.Context, *MessageRequest) (*MessageResponse, error) {
+func (UnimplementedTgdisMessageServer) NewMessage(context.Context, *MessageRequest) (*MessageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewMessage not implemented")
 }
-func (UnimplementedTgdisMessageServiceServer) mustEmbedUnimplementedTgdisMessageServiceServer() {}
-func (UnimplementedTgdisMessageServiceServer) testEmbeddedByValue()                             {}
+func (UnimplementedTgdisMessageServer) mustEmbedUnimplementedTgdisMessageServer() {}
+func (UnimplementedTgdisMessageServer) testEmbeddedByValue()                      {}
 
-// UnsafeTgdisMessageServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TgdisMessageServiceServer will
+// UnsafeTgdisMessageServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TgdisMessageServer will
 // result in compilation errors.
-type UnsafeTgdisMessageServiceServer interface {
-	mustEmbedUnimplementedTgdisMessageServiceServer()
+type UnsafeTgdisMessageServer interface {
+	mustEmbedUnimplementedTgdisMessageServer()
 }
 
-func RegisterTgdisMessageServiceServer(s grpc.ServiceRegistrar, srv TgdisMessageServiceServer) {
-	// If the following call pancis, it indicates UnimplementedTgdisMessageServiceServer was
+func RegisterTgdisMessageServer(s grpc.ServiceRegistrar, srv TgdisMessageServer) {
+	// If the following call pancis, it indicates UnimplementedTgdisMessageServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&TgdisMessageService_ServiceDesc, srv)
+	s.RegisterService(&TgdisMessage_ServiceDesc, srv)
 }
 
-func _TgdisMessageService_NewMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _TgdisMessage_NewMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MessageRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TgdisMessageServiceServer).NewMessage(ctx, in)
+		return srv.(TgdisMessageServer).NewMessage(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TgdisMessageService_NewMessage_FullMethodName,
+		FullMethod: TgdisMessage_NewMessage_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TgdisMessageServiceServer).NewMessage(ctx, req.(*MessageRequest))
+		return srv.(TgdisMessageServer).NewMessage(ctx, req.(*MessageRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// TgdisMessageService_ServiceDesc is the grpc.ServiceDesc for TgdisMessageService service.
+// TgdisMessage_ServiceDesc is the grpc.ServiceDesc for TgdisMessage service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var TgdisMessageService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "tgdis.TgdisMessageService",
-	HandlerType: (*TgdisMessageServiceServer)(nil),
+var TgdisMessage_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "tgdis.TgdisMessage",
+	HandlerType: (*TgdisMessageServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "NewMessage",
-			Handler:    _TgdisMessageService_NewMessage_Handler,
+			Handler:    _TgdisMessage_NewMessage_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
