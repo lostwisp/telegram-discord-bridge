@@ -7,6 +7,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type ConfigDB struct {
+	db_host    string
+	db_port    string
+	db_user    string
+	db_pasword string
+	db_name    string
+}
+
 type Storage struct {
 	db *pgxpool.Pool
 }
