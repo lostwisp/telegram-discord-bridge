@@ -4,7 +4,7 @@
 // 	protoc        v6.32.1
 // source: tg-dis.proto
 
-package telegram_discord_bridge
+package tg_dis
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -120,7 +120,7 @@ const file_tg_dis_proto_rawDesc = "" +
 	"\x05score\x18\x01 \x01(\x03R\x05score2K\n" +
 	"\fTgdisMessage\x12;\n" +
 	"\n" +
-	"NewMessage\x12\x15.tgdis.MessageRequest\x1a\x16.tgdis.MessageResponseB-Z+github.com/lostwisp/telegram-discord-bridgeb\x06proto3"
+	"NewMessage\x12\x15.tgdis.MessageRequest\x1a\x16.tgdis.MessageResponseB9Z7github.com/lostwisp/telegram-discord-bridge/gRPC/tg-disb\x06proto3"
 
 var (
 	file_tg_dis_proto_rawDescOnce sync.Once

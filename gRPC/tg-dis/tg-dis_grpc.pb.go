@@ -4,7 +4,7 @@
 // - protoc             v6.32.1
 // source: tg-dis.proto
 
-package telegram_discord_bridge
+package tg_dis
 
 import (
 	context "context"
