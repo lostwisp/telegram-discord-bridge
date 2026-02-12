@@ -1,11 +1,23 @@
 package discord
 
 import (
-	"github.com/bwmarrin/discordgo"
-	tgdis "github.com/lostwisp/telegram-discord-bridge/gRPC/tg-dis"
+	"context"
 	"log"
 	"net"
+
+	"github.com/bwmarrin/discordgo"
+	tgdis "github.com/lostwisp/telegram-discord-bridge/gRPC/tg-dis"
+	config "github.com/lostwisp/telegram-discord-bridge/pwd"
+	"google.golang.org/grpc"
 )
+
+type server struct {
+	tgdis.UnimplementedTgdisMessageServiceServer
+}
+
+func (s *server) NewMessage(ctx context.Context, req *tgdis.MessageRequest) (*tgdis.MessageResponse, error) {
+	return &tgdis.MessageResponse{Score: 0}, nil
+}
 
 var (
 	DiscordToken     string
@@ -39,5 +51,13 @@ func main() {
 	conn, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Println(err)
+	}
+
+	grpcServer := grpc.NewServer()
+
+	tgdis.RegisterTgdisMessageServiceServer(grpcServer, &server{})
+
+	if err := grpcServer.Serve(conn); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
 }

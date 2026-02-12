@@ -1,16 +1,20 @@
-package telegram
+package main
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
-	"net/url"
+	"os"
 	"time"
-)
 
-var (
-	TelegramToken string
+	"github.com/jackc/pgx/v5"
+	tgdis "github.com/lostwisp/telegram-discord-bridge/gRPC/tg-dis"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var TelegramIdAdmin = map[int64]bool{
@@ -19,85 +23,188 @@ var TelegramIdAdmin = map[int64]bool{
 	5497536893: true,
 }
 
-func main() {
-
+type ResultJSON struct {
+	Ok     bool `json:"ok"`
+	Result []struct {
+		UpdateID int `json:"update_id"`
+		Message  *struct {
+			Text string `json:"text"`
+			Chat struct {
+				Id int `json:"id"`
+			} `json:"chat"`
+			From struct {
+				ID int64 `json:"id"`
+			} `json:"from"`
+		} `json:"message"`
+		CallbackQuery struct {
+			ID   string `json:"id"`
+			From struct {
+				Id        int64  `json:"id"`
+				IsBot     bool   `json:"is_bot"`
+				FirstName string `json:"first_name"`
+				Username  string `json:"username"`
+			} `json:"from"`
+			Data string `json:"data"`
+		} `json:"callback_query"`
+	} `json:"result"`
 }
 
-func SendMessenge(idchat int, messege string) error {
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%d&text=%s", config.TelegramToken, idchat, url.QueryEscape("Сообщение принято"))
-	_, err := http.Get(url)
-	discord.SendMessengeToDiscord(messege)
+type DiscordgRPC struct {
+	Client tgdis.TgdisMessageClient
+	conn   *grpc.ClientConn
+}
+
+func NewDiscordgRPC() *DiscordgRPC {
+	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		println(err)
+		return nil
 	}
+
+	Client := tgdis.NewTgdisMessageClient(conn)
+	return &DiscordgRPC{Client, conn}
+}
+
+func (D *DiscordgRPC) SendToDiscord(mes string) (*tgdis.MessageResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	req := &tgdis.MessageRequest{Message: mes}
+	resp, err := D.Client.NewMessage(ctx, req)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return resp, nil
+}
+
+type TelegramBot struct {
+	URL    string
+	Offset int
+}
+
+type bdconfig struct {
+	host     string
+	port     string
+	db_name  string
+	user     string
+	password string
+}
+
+func (T *TelegramBot) Update() (*ResultJSON, error) {
+
+	resp, err := http.Get(T.URL)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	dat, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	resp.Body.Close()
+
+	var result ResultJSON
+	err = json.Unmarshal(dat, &result)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	if result.Ok && (len(result.Result) > 0) {
+		for _, update := range result.Result {
+			T.Offset = update.UpdateID + 1
+		}
+	}
+
+	return &result, nil
+}
+
+func (T TelegramBot) SendToUser(idchat int, mes string) (*http.Response, error) {
+	url := fmt.Sprintf("%s/sendMessage", T.URL)
+	var str = struct {
+		ChatID  int    `json:"chat_id"`
+		Message string `json:"text"`
+	}{
+		ChatID:  idchat,
+		Message: mes,
+	}
+	bytestr, err := json.Marshal(str)
+	if err != nil {
+		log.Println(err)
+	}
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(bytestr))
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (T TelegramBot) Requestbd() error {
 	return nil
 }
 
-func Start(TOKEN string) error {
-	offset := 791038172
-	err := discord.InstalDiscordBot()
+func (T TelegramBot) Save() error {
+	return nil
+}
+func LoadConfig(TOKEN *string, host *string, port *string, db_name *string, user *string, password *string) {
+	*TOKEN = os.Getenv("TELEGRAM_BOT_TOKEN")
+	*host = os.Getenv("HOST")
+	*port = os.Getenv("PORT")
+	*db_name = os.Getenv("DBNAME")
+	*user = os.Getenv("USER")
+	*password = os.Getenv("PASSWORD")
+}
+
+func main() {
+
+	var TOKEN, host, port, db_name, user, password string
+	LoadConfig(&TOKEN, &host, &port, &db_name, &user, &password)
+	urldb := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, password, host, port, db_name)
+	conn, err := pgx.Connect(context.Background(), urldb)
 	if err != nil {
-		println(err)
+		log.Println(err)
 	}
-	defer discord.Session.Close()
+	err = conn.Ping(context.Background())
+	if err != nil {
+		log.Println("Failed to connect", err)
+	}
+
+	url := fmt.Sprintf("https://api.telegram.org/bot%s", TOKEN)
+	bot := TelegramBot{url, 791038172}
+
+	clintDiscord := NewDiscordgRPC()
+	defer clintDiscord.conn.Close()
 
 	for {
-		URL := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?offset=%d", TOKEN, offset)
-		resp, err := http.Get(URL)
-		if err != nil {
-			println(err)
-		}
-		dat, err := io.ReadAll(resp.Body)
-		if err != nil {
-			println(err)
-		}
-		resp.Body.Close()
-		var result struct {
-			Ok     bool `json:"ok"`
-			Result []struct {
-				UpdateID int `json:"update_id"`
-				Message  *struct {
-					Text string `json:"text"`
-					Chat struct {
-						Id int `json:"id"`
-					} `json:"chat"`
-					From struct {
-						ID int64 `json:"id"`
-					} `json:"from"`
-				} `json:"message"`
-				CallbackQuery struct {
-					ID   string `json:"id"`
-					From struct {
-						Id        int64  `json:"id"`
-						IsBot     bool   `json:"is_bot"`
-						FirstName string `json:"first_name"`
-						Username  string `json:"username"`
-					} `json:"from"`
-					Data string `json:"data"`
-				} `json:"callback_query"`
-			} `json:"result"`
-		}
-		err = json.Unmarshal(dat, &result)
-		if err != nil {
-			println(err)
-		}
-
-		if result.Ok && (len(result.Result) > 0) {
-			for _, update := range result.Result {
-
-				println("UpdateID:", update.UpdateID, " UsersId:", update.Message.From.ID, " Message: ", update.Message.Text)
-				if config.TelegramIdAdmin[update.Message.From.ID] {
-					SendMessenge(update.Message.Chat.Id, update.Message.Text)
-					if err != nil {
-						println("Сообщение не отправленно")
-					}
-				} else {
-					print("Доступ запрещён")
-				}
-				offset = update.UpdateID + 1
-			}
-		}
 
 		time.Sleep(1 * time.Second)
+		result, err := bot.Update()
+		if err != nil {
+			log.Println(err)
+		}
+
+		for _, update := range result.Result {
+			resp, err := bot.SendToUser(update.Message.Chat.Id, update.Message.Text)
+			if err != nil {
+				log.Println(err)
+			}
+			if resp.StatusCode != 200 {
+				log.Println("The message was not delivered", resp.Status)
+			}
+			mesResp, err := clintDiscord.SendToDiscord(update.Message.Text)
+			if err != nil {
+				log.Println(err)
+			}
+			if mesResp.Score != 0 {
+
+				log.Println("Services Discord didn't send the message.")
+			}
+
+		}
 	}
+}
+
+func ConnectDB() {
+
 }
