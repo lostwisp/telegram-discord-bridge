@@ -2,4 +2,10 @@ FROM golang
 
 WORKDIR /app
 
-COPY telegram.go go.mod ./
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+COPY telegram.go .env ./
+
+RUN ["go","run","telegram.go"]

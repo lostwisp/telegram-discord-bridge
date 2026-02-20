@@ -160,16 +160,24 @@ func main() {
 
 	var TOKEN, host, port, db_name, user, password string
 	LoadConfig(&TOKEN, &host, &port, &db_name, &user, &password)
+
 	urldb := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, password, host, port, db_name)
-	conn, err := pgx.Connect(context.Background(), urldb)
+
+	ctx, cancel := context.WithTimeout(context.Background(), (time.Second * 3))
+
+	conn, err := pgx.Connect(ctx, urldb)
 	if err != nil {
 		log.Println(err)
 	}
-	err = conn.Ping(context.Background())
-	if err != nil {
-		log.Println("Failed to connect", err)
+
+	if conn != nil {
+		err = conn.Ping(ctx)
+		if err != nil {
+			log.Println("Failed to connect", err)
+		}
 	}
 
+	defer cancel()
 	url := fmt.Sprintf("https://api.telegram.org/bot%s", TOKEN)
 	bot := TelegramBot{url, 791038172}
 
