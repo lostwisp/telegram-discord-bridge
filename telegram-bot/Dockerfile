@@ -8,4 +8,4 @@ RUN go mod download
 
 COPY telegram.go .env ./
 
-RUN ["go","run","telegram.go"]
+CMD ["go","run","telegram.go"]
