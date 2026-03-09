@@ -1,6 +1,7 @@
 version: "1.0"
 services:
   telegram-bot:
+    container_name: telegram-bot
     build:
       context: ./telegram-bot/
       dockerfile: Dockerfile
@@ -8,6 +9,7 @@ services:
       - backend_network
 
   discord-bot:
+    container_name: discord-bot
     build:
       context: ./discord-bot/
       dockerfile: Dockerfile
@@ -15,6 +17,7 @@ services:
       - backend_network
 
   db:
+    container_name: db
     image: postgres
     env_file:
       - ./db/.env
