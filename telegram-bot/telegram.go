@@ -212,7 +212,3 @@ func main() {
 		}
 	}
 }
-
-func ConnectDB() {
-
-}

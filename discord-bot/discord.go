@@ -1,33 +1,63 @@
-package discord
+package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/jackc/pgx/v5"
 	tgdis "github.com/lostwisp/telegram-discord-bridge/gRPC/tg-dis"
 	"google.golang.org/grpc"
 )
 
 type server struct {
-	tgdis.UnimplementedTgdisMessageServiceServer
+	tgdis.UnimplementedTgdisMessageServer
+	bot *discordgo.Session
+	db  *pgx.Conn
 }
 
 func (s *server) NewMessage(ctx context.Context, req *tgdis.MessageRequest) (*tgdis.MessageResponse, error) {
+	sendMessage(s.bot, req)
 	return &tgdis.MessageResponse{Score: 0}, nil
 }
-
-var bot *discordgo.Session
 
 func GetEnv() string {
 	return os.Getenv("DISCORD_BOT_TOKEN")
 }
 
+func LoadConfig(TOKEN *string, host *string, port *string, db_name *string, user *string, password *string) {
+	*TOKEN = os.Getenv("TELEGRAM_BOT_TOKEN")
+	*host = os.Getenv("HOST")
+	*port = os.Getenv("PORT")
+	*db_name = os.Getenv("DBNAME")
+	*user = os.Getenv("USER")
+	*password = os.Getenv("PASSWORD")
+}
+
 func main() {
+	//Подключение к базе данных
+	var TOKEN, host, port, db_name, user, password string
+	LoadConfig(&TOKEN, &host, &port, &db_name, &user, &password)
+
+	urldb := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, password, host, port, db_name)
+
+	ctx, cancel := context.WithTimeout(context.Background(), (3 * time.Second))
+	db, err := pgx.Connect(ctx, urldb)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if db.Ping(ctx) != nil {
+		log.Println("Ping error")
+	}
+	defer cancel()
+
 	//Создание сервера для прослушивания gRPC
 	conn, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -35,42 +65,70 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-
-	tgdis.RegisterTgdisMessageServiceServer(grpcServer, &server{})
-
-	if err := grpcServer.Serve(conn); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	server := &server{}
+	tgdis.RegisterTgdisMessageServer(grpcServer, server)
 
 	//Создание бота с WebSocket
 	token := GetEnv()
-	bot, err = discordgo.New("Bot " + token)
+	log.Println("Bot " + token)
+	server.bot, err = discordgo.New("Bot " + token)
 	if err != nil {
 		log.Println(err)
 	}
-	bot.AddHandler(pingPong)
-	err = bot.Open()
+	server.bot.AddHandler(pingPong)
+
+	server.bot.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
+		s.ApplicationCommandCreate(s.State.User.ID, "1274859278750056471", &discordgo.ApplicationCommand{
+			Name:        "ping",
+			Description: "Ping, test the connect to the bot",
+		})
+	})
+
+	err = server.bot.Open()
 	if err != nil {
 		log.Println(err)
 	}
-	defer bot.Close()
+	defer server.bot.Close()
+
+	//запуск gRPC
+	go func() {
+		if err := grpcServer.Serve(conn); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM)
 	<-sc
 }
 
-func pingPong(s *discordgo.Session, m *discordgo.MessageCreate) {
-	// Игнорируем сообщения от самого бота (чтобы избежать циклов)
-	if m.Author.ID == s.State.User.ID {
-		return
+func getchannelID(ctx context.Context, db *pgx.Conn, user string) (string, error) {
+	row, err := db.Query(ctx, "SELECT chennelId FROM user_channels WHERE telegramId=$1", user)
+	if err != nil {
+		return "", err
 	}
+	defer row.Close()
+	var channelId string
+	row.Scan(&channelId)
+	return channelId, nil
+}
 
-	// Если сообщение содержит "!ping", отвечаем "Pong!"
-	if m.Content == "!ping" {
-		_, err := s.ChannelMessageSend(m.ChannelID, "Pong! 🏓")
-		if err != nil {
-			log.Printf("Ошибка при отправке сообщения: %v", err)
-		}
+func sendMessage(s *discordgo.Session, channelID string, content string) error {
+	_, err := s.ChannelMessageSend(channelID, content)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func pingPong(s *discordgo.Session, m *discordgo.InteractionCreate) {
+	if m.Type == discordgo.InteractionApplicationCommand {
+		log.Println(m.Type, "==", discordgo.InteractionApplicationCommand.String())
+		s.InteractionRespond(m.Interaction, &discordgo.InteractionResponse{
+			Type: discordgo.InteractionResponseChannelMessageWithSource,
+			Data: &discordgo.InteractionResponseData{
+				Content: "Pong",
+			},
+		})
 	}
 }
