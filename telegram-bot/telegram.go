@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	tgdis "github.com/lostwisp/telegram-discord-bridge/gRPC/tg-dis"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -211,4 +212,12 @@ func main() {
 
 		}
 	}
+}
+
+func InitTables(ctx context.Context, conn *pgx.Conn) (pgconn.CommandTag, error) {
+	tag, err := conn.Exec(ctx, "CREATE TABLE IF NOT EXIST user_channels {telegramId TEXT PRIMARY KEY, chennelId TEXT}")
+	if err != nil {
+		return pgconn.CommandTag{}, err
+	}
+	return tag, nil
 }

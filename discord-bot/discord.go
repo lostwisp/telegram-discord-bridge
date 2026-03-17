@@ -23,7 +23,7 @@ type server struct {
 }
 
 func (s *server) NewMessage(ctx context.Context, req *tgdis.MessageRequest) (*tgdis.MessageResponse, error) {
-	sendMessage(s.bot, req)
+	//sendMessage(s.bot, req)
 	return &tgdis.MessageResponse{Score: 0}, nil
 }
 
@@ -78,7 +78,7 @@ func main() {
 	server.bot.AddHandler(pingPong)
 
 	server.bot.AddHandler(func(s *discordgo.Session, r *discordgo.Ready) {
-		s.ApplicationCommandCreate(s.State.User.ID, "1274859278750056471", &discordgo.ApplicationCommand{
+		s.ApplicationCommandCreate(s.State.User.ID, "", &discordgo.ApplicationCommand{
 			Name:        "ping",
 			Description: "Ping, test the connect to the bot",
 		})
