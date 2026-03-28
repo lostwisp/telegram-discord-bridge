@@ -9,7 +9,8 @@ service TgdisMessage{
 }
 
 message MessageRequest{
-    string message = 1;
+    string userId = 1;
+    string userMessage = 2;
 }
 
 message MessageResponse{

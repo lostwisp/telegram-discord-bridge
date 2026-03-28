@@ -5,6 +5,8 @@ services:
     build:
       context: ./telegram-bot/
       dockerfile: Dockerfile
+    env_file:
+      - ./telegram-bot/.env
     networks:
       - backend_network
 
@@ -13,6 +15,8 @@ services:
     build:
       context: ./discord-bot/
       dockerfile: Dockerfile
+    env_file:
+      - ./discord-bot/.env
     networks:
       - backend_network
 

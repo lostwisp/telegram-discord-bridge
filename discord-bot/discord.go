@@ -23,7 +23,13 @@ type server struct {
 }
 
 func (s *server) NewMessage(ctx context.Context, req *tgdis.MessageRequest) (*tgdis.MessageResponse, error) {
-	//sendMessage(s.bot, req)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	chennelId, err := getchannelID(ctx, s.db, req.Message)
+	if err != nil {
+		return &tgdis.MessageResponse{Score: 0}, nil
+	}
+	sendMessage(s.bot, chennelId, req.Message)
 	return &tgdis.MessageResponse{Score: 0}, nil
 }
 

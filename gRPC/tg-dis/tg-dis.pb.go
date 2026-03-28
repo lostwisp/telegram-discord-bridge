@@ -23,7 +23,8 @@ const (
 
 type MessageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	UserMessage   string                 `protobuf:"bytes,2,opt,name=userMessage,proto3" json:"userMessage,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -58,9 +59,16 @@ func (*MessageRequest) Descriptor() ([]byte, []int) {
 	return file_tg_dis_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MessageRequest) GetMessage() string {
+func (x *MessageRequest) GetUserId() string {
 	if x != nil {
-		return x.Message
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *MessageRequest) GetUserMessage() string {
+	if x != nil {
+		return x.UserMessage
 	}
 	return ""
 }
@@ -113,9 +121,10 @@ var File_tg_dis_proto protoreflect.FileDescriptor
 
 const file_tg_dis_proto_rawDesc = "" +
 	"\n" +
-	"\ftg-dis.proto\x12\x05tgdis\"*\n" +
-	"\x0eMessageRequest\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"'\n" +
+	"\ftg-dis.proto\x12\x05tgdis\"J\n" +
+	"\x0eMessageRequest\x12\x16\n" +
+	"\x06userId\x18\x01 \x01(\tR\x06userId\x12 \n" +
+	"\vuserMessage\x18\x02 \x01(\tR\vuserMessage\"'\n" +
 	"\x0fMessageResponse\x12\x14\n" +
 	"\x05score\x18\x01 \x01(\x03R\x05score2K\n" +
 	"\fTgdisMessage\x12;\n" +
