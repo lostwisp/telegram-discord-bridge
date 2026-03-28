@@ -25,11 +25,11 @@ type server struct {
 func (s *server) NewMessage(ctx context.Context, req *tgdis.MessageRequest) (*tgdis.MessageResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	chennelId, err := getchannelID(ctx, s.db, req.Message)
+	chennelId, err := getchannelID(ctx, s.db, req.UserId)
 	if err != nil {
 		return &tgdis.MessageResponse{Score: 0}, nil
 	}
-	sendMessage(s.bot, chennelId, req.Message)
+	sendMessage(s.bot, chennelId, req.UserMessage)
 	return &tgdis.MessageResponse{Score: 0}, nil
 }
 
