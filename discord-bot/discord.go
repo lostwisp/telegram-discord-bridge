@@ -3,17 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"github.com/jackc/pgx/v5"
+	tgdis "github.com/lostwisp/telegram-discord-bridge/gRPC/tg-dis"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/bwmarrin/discordgo"
-	"github.com/jackc/pgx/v5"
-	tgdis "github.com/lostwisp/telegram-discord-bridge/gRPC/tg-dis"
-	"google.golang.org/grpc"
 )
 
 type server struct {
@@ -27,9 +28,12 @@ func (s *server) NewMessage(ctx context.Context, req *tgdis.MessageRequest) (*tg
 	defer cancel()
 	chennelId, err := getchannelID(ctx, s.db, req.UserId)
 	if err != nil {
-		return &tgdis.MessageResponse{Score: 0}, nil
+		return &tgdis.MessageResponse{Score: 1}, status.Error(codes.NotFound, "User does not exist")
 	}
-	sendMessage(s.bot, chennelId, req.UserMessage)
+	err = sendMessage(s.bot, chennelId, req.UserMessage)
+	if err != nil {
+		return &tgdis.MessageResponse{Score: 1}, status.Error(codes.Unknown, "The message is not sent")
+	}
 	return &tgdis.MessageResponse{Score: 0}, nil
 }
 
@@ -109,13 +113,11 @@ func main() {
 }
 
 func getchannelID(ctx context.Context, db *pgx.Conn, user string) (string, error) {
-	row, err := db.Query(ctx, "SELECT chennelId FROM user_channels WHERE telegramId=$1", user)
+	var channelId string
+	err := db.QueryRow(ctx, "SELECT chennelId FROM user_channels WHERE telegramId=$1", user).Scan(&channelId)
 	if err != nil {
 		return "", err
 	}
-	defer row.Close()
-	var channelId string
-	row.Scan(&channelId)
 	return channelId, nil
 }
 

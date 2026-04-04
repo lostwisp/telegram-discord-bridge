@@ -5,7 +5,7 @@ go 1.25.1
 require (
 	github.com/bwmarrin/discordgo v0.29.0
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/lostwisp/telegram-discord-bridge/gRPC/tg-dis v0.0.0-20260328140221-feec08cc2cae
+	github.com/lostwisp/telegram-discord-bridge/gRPC/tg-dis v0.0.1
 	google.golang.org/grpc v1.79.3
 )
 
